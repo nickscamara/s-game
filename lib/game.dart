@@ -141,10 +141,11 @@ class _GameState extends State<Game> {
         positions: [45, 65, 85, 105, 125]);
   }
   
-  finishGame(context)
+  finishGame(context) async
   {
-     final routeService = Provider.of<RouteService>(context, listen: false);
+    final routeService = Provider.of<RouteService>(context, listen: false);
     timer.cancel();
+    await saveProgress();
     removeBots();
      showGameOverDialog(context, snake,(){
       restartGame();
@@ -155,9 +156,13 @@ class _GameState extends State<Game> {
       Navigator.pop(context);
       routeService.navigate(0);
       }
-    
      );
-    
+  }
+  saveProgress() async
+  {
+    final userService = Provider.of<UserService>(context, listen: false);
+    final response = await userService.updatePreferences(snake);
+
   }
   removeBots()
   {

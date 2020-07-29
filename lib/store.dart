@@ -20,7 +20,6 @@ class _StoreState extends State<Store> {
       name: "Mint",
       price: 300,
       image: "assets/img/snake_green.png",
-      
     ),
     Snake(
       color: Colors.purple,
@@ -34,7 +33,6 @@ class _StoreState extends State<Store> {
       price: 700,
       image: "assets/img/snake_orange.png",
     ),
-
   ];
   List<Board> boardsToBuy = [
     Board(
@@ -84,11 +82,10 @@ class _StoreState extends State<Store> {
       name: "Diamond Pack",
       price: 99.99,
     ),
-    
   ];
   @override
   Widget build(BuildContext context) {
-    final routeService = Provider.of<RouteService>(context,listen:false);
+    final routeService = Provider.of<RouteService>(context, listen: false);
     return Scaffold(
       backgroundColor: Colors.black,
       floatingActionButton: Row(
@@ -96,13 +93,16 @@ class _StoreState extends State<Store> {
         children: <Widget>[
           FloatingActionButton(
             child: Text("Back"),
-            onPressed: ()=>routeService.navigate(0),
+            onPressed: () => routeService.navigate(0),
           ),
           SizedBox(width: 10),
           FloatingActionButton(
-           backgroundColor: Colors.orange,
-            child: Text("Play",style: TextStyle(color: Colors.white),),
-            onPressed: ()=>routeService.navigate(2),
+            backgroundColor: Colors.orange,
+            child: Text(
+              "Play",
+              style: TextStyle(color: Colors.white),
+            ),
+            onPressed: () => routeService.navigate(2),
           ),
         ],
       ),
@@ -127,96 +127,99 @@ class _StoreState extends State<Store> {
       ),
     );
   }
-  
-  Widget header(String text)
-  {
+
+  Widget header(String text) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Text(text, style: TextStyle(color: Colors.white,fontSize: 25,fontWeight: FontWeight.bold),),
+        Text(
+          text,
+          style: TextStyle(
+              color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold),
+        ),
         coins(),
       ],
     );
   }
 
-Widget heading(String text)
-  {
-    return Text(text, style: TextStyle(color: Colors.white,fontSize: 18),);
-  }
-  Widget moreCoins()
-  {
-    return Padding(
-      padding: const EdgeInsets.only(top:15.0),
-      child: _customCard("Get FREE Coins!", "Watch a small video", (){}, LinearGradient(
-        colors: [Colors.lightGreen,Colors.green]
-
-      ), false),
+  Widget heading(String text) {
+    return Text(
+      text,
+      style: TextStyle(color: Colors.white, fontSize: 18),
     );
   }
-  Widget boards()
-  {
+
+  Widget moreCoins() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 15.0),
+      child: _customCard("Get FREE Coins!", "Watch a small video", () {},
+          LinearGradient(colors: [Colors.lightGreen, Colors.green]), false),
+    );
+  }
+
+  Widget boards() {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 175,
       child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: boardsToBuy.length,
-        itemBuilder: (context, index){
-          return boardCard(boardsToBuy[index],()=> buyBoard(boardsToBuy[index]));
-
-      }),
+          scrollDirection: Axis.horizontal,
+          itemCount: boardsToBuy.length,
+          itemBuilder: (context, index) {
+            return boardCard(
+                boardsToBuy[index], () => buyBoard(boardsToBuy[index]));
+          }),
     );
   }
-  Widget coinsGrid()
-  {
+
+  Widget coinsGrid() {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 500,
       child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-        itemCount: coinsToBuy.length,
-        physics: NeverScrollableScrollPhysics(),
-        itemBuilder: (context, index){
-          return coinCard(coinsToBuy[index], ()=> buyCoins(coinsToBuy[index]));
-
-      }),
+          gridDelegate:
+              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+          itemCount: coinsToBuy.length,
+          physics: NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            return coinCard(
+                coinsToBuy[index], () => buyCoins(coinsToBuy[index]));
+          }),
     );
   }
 
-  Widget snakes()
-  {
+  Widget snakes() {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 175,
       child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: avaiableToBuy.length,
-        itemBuilder: (context, index){
-          return snakeCard(avaiableToBuy[index],()=> buy(avaiableToBuy[index]));
-
-      }),
+          scrollDirection: Axis.horizontal,
+          itemCount: avaiableToBuy.length,
+          itemBuilder: (context, index) {
+            return snakeCard(
+                avaiableToBuy[index], () => buy(avaiableToBuy[index]));
+          }),
     );
   }
 
-  buy(Snake snake)
-  {
+  buy(Snake snake) {
     print("Bought!");
   }
-  buyBoard(Board board)
-  {
+
+  buyBoard(Board board) {
     print("Bought! Board");
   }
-  buyCoins(Coin coin)
-  {
+
+  buyCoins(Coin coin) {
     print("Bought! Coins");
   }
 
-  Widget coins()
-  {
+  Widget coins() {
     return Row(
       children: <Widget>[
-        Image.asset("assets/img/coin.png",width:25),
-        SizedBox(width: 3,),
+        Image.asset("assets/img/coin.png", width: 25),
+        SizedBox(
+          width: 3,
+        ),
         Text("999999")
       ],
     );
@@ -260,12 +263,15 @@ Widget heading(String text)
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                         Column(
-                           children: <Widget>[
-                             Image.asset("assets/img/coin.png",width: 25,),
-                             Text("+50")
-                           ],
-                         ),
+                          Column(
+                            children: <Widget>[
+                              Image.asset(
+                                "assets/img/coin.png",
+                                width: 25,
+                              ),
+                              Text("+50")
+                            ],
+                          ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -304,9 +310,6 @@ Widget heading(String text)
               ))),
     );
   }
-  
-
- 
 
   Widget snakeCard(Snake snake, Function onTap) {
     return Container(
@@ -320,11 +323,10 @@ Widget heading(String text)
                 decoration: BoxDecoration(
                   color: Colors.grey.withOpacity(.25),
                   borderRadius: BorderRadius.circular(25),
-                 
                 ),
                 child: Material(
-                  shape:
-                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25)),
                   elevation: 0,
                   color: Colors.transparent,
                   //color: color,
@@ -340,7 +342,8 @@ Widget heading(String text)
                               color: Colors.grey.withOpacity(0.1),
                               spreadRadius: 1,
                               blurRadius: 3,
-                              offset: Offset(0, 3), // changes position of shadow
+                              offset:
+                                  Offset(0, 3), // changes position of shadow
                             ),
                           ],
                           // gradient: highlightsList[index].gradient,
@@ -366,7 +369,7 @@ Widget heading(String text)
                                     height: 5,
                                   ),
                                   Text(
-                                   snake.price.toString(),
+                                    snake.price.toString(),
                                     maxLines: 1,
                                     style: TextStyle(
                                         fontSize: 25,
@@ -396,6 +399,7 @@ Widget heading(String text)
       ),
     );
   }
+
   Widget boardCard(Board board, Function onTap) {
     return Container(
       height: 175,
@@ -408,11 +412,10 @@ Widget heading(String text)
                 decoration: BoxDecoration(
                   color: Colors.grey.withOpacity(.25),
                   borderRadius: BorderRadius.circular(25),
-                 
                 ),
                 child: Material(
-                  shape:
-                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25)),
                   elevation: 0,
                   color: Colors.transparent,
                   //color: color,
@@ -428,7 +431,8 @@ Widget heading(String text)
                               color: Colors.grey.withOpacity(0.1),
                               spreadRadius: 1,
                               blurRadius: 3,
-                              offset: Offset(0, 3), // changes position of shadow
+                              offset:
+                                  Offset(0, 3), // changes position of shadow
                             ),
                           ],
                           // gradient: highlightsList[index].gradient,
@@ -454,7 +458,7 @@ Widget heading(String text)
                                     height: 5,
                                   ),
                                   Text(
-                                   board.price.toString(),
+                                    board.price.toString(),
                                     maxLines: 1,
                                     style: TextStyle(
                                         fontSize: 25,
@@ -484,6 +488,7 @@ Widget heading(String text)
       ),
     );
   }
+
   Widget coinCard(Coin coin, Function onTap) {
     return Container(
       height: 175,
@@ -496,11 +501,10 @@ Widget heading(String text)
                 decoration: BoxDecoration(
                   color: Colors.grey.withOpacity(.25),
                   borderRadius: BorderRadius.circular(25),
-                 
                 ),
                 child: Material(
-                  shape:
-                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25)),
                   elevation: 0,
                   color: Colors.transparent,
                   //color: color,
@@ -516,7 +520,8 @@ Widget heading(String text)
                               color: Colors.grey.withOpacity(0.1),
                               spreadRadius: 1,
                               blurRadius: 3,
-                              offset: Offset(0, 3), // changes position of shadow
+                              offset:
+                                  Offset(0, 3), // changes position of shadow
                             ),
                           ],
                           // gradient: highlightsList[index].gradient,
@@ -534,7 +539,7 @@ Widget heading(String text)
                                   Align(
                                       alignment: Alignment.center,
                                       child: Image.asset(
-                                       "assets/img/coin.png",
+                                        "assets/img/coin.png",
                                         width: 25,
                                         height: 25,
                                       )),
@@ -550,7 +555,6 @@ Widget heading(String text)
                                   ),
                                   Text(
                                     coin.quantity.toString(),
-                                  
                                     maxLines: 1,
                                     style: TextStyle(
                                         fontSize: 18,
@@ -559,7 +563,7 @@ Widget heading(String text)
                                     textAlign: TextAlign.center,
                                   ),
                                   Text(
-                                     "\$"+coin.price.toString(),
+                                    "\$" + coin.price.toString(),
                                     maxLines: 1,
                                     style: TextStyle(
                                         fontSize: 12,

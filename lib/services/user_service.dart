@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:premiumsnake/model/snake.dart';
 import 'package:premiumsnake/model/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,5 +41,28 @@ class UserService extends ChangeNotifier{
         currentSnake: currentSnake,
       );
     }
+  }
+ Future<void> updatePreferences(Snake snake) async{
+   final user = await getUser();
+   if(snake.score > user.highScore)
+   {
+     updateHighScore(snake.score);
+   }
+   updateCoins(snake.score);
+   notifyListeners();
+ }
+
+
+  Future<void> updateHighScore(int newHighScore) async
+  {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt("highScore", newHighScore);
+  }
+  Future<void> updateCoins(int coins) async
+  {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int oldCoins = prefs.getInt("coins");
+    int newCoins = coins + oldCoins;
+    prefs.setInt("coins", newCoins);
   }
 }

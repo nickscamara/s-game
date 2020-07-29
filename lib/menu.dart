@@ -79,6 +79,13 @@ class _MenuState extends State<Menu> {
                             ],
                           ),
                         ),
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Text("Highscore: " + user.highScore.toString(),style: TextStyle(fontSize: 18),),
+                          ),
+                        ),
                         Align(
                             alignment: Alignment.center,
                             child: Image.asset("assets/img/logo1.png",
