@@ -37,7 +37,7 @@ Dialog dialog = Dialog(
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), //this right here
   child: Container(
     color: Colors.transparent,
-    height: MediaQuery.of(context).size.height / 2.5,
+    height: MediaQuery.of(context).size.height / 2,
     width: MediaQuery.of(context).size.width / 3,
 
     child: Column(
@@ -50,6 +50,17 @@ Dialog dialog = Dialog(
         Padding(
           padding: EdgeInsets.all(15.0),
           child: Text('Score: ${snake.score.toString()}', style: TextStyle(color: Colors.white,fontSize: 20),),
+        ),
+        Padding(
+          padding: EdgeInsets.all(15.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Image.asset("assets/img/singlecoin.png",width: 20,),
+              SizedBox(width: 5,),
+              Text('${snake.coins.toString()}', style: TextStyle(color: Colors.white,fontSize: 20),),
+            ],
+          ),
         ),
         Padding(padding: EdgeInsets.only(top: 10.0)),
         _button(context,"Restart", onRestart, Colors.amber),

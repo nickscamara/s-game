@@ -48,7 +48,7 @@ class UserService extends ChangeNotifier{
    {
      updateHighScore(snake.score);
    }
-   updateCoins(snake.score);
+   updateCoins(snake.coins);
    notifyListeners();
  }
 

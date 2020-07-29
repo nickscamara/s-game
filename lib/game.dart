@@ -25,10 +25,12 @@ class _GameState extends State<Game> {
   // Initialize snake with positions, name, color and score of 0
   Snake snake;
   static var random;
+  static var randomCoin;
   List<Snake> bots =[];
   List<String> directions = ["up","down","left","right"];
   Timer timer;
   var food;
+  var coin;
   String currentPosition;
 
   @override
@@ -46,7 +48,7 @@ class _GameState extends State<Game> {
   startGame() {
     initializeSnake();
     initalizeRandoms();
-    initializeFood();
+    initializeItems();
     timer = Timer.periodic(Duration(milliseconds: 100), (timer) {
       updateGame();
       if (gameOver()) {
@@ -58,11 +60,12 @@ class _GameState extends State<Game> {
   }
   initalizeRandoms(){
     random = Random();
+    randomCoin = Random();
 
   }
-  initializeFood(){
+  initializeItems(){
     food = random.nextInt(foodRange);
-
+    coin = randomCoin.nextInt(foodRange);
   }
   restartGame()
   {
@@ -137,6 +140,9 @@ class _GameState extends State<Game> {
         name: "Snake 1",
         color: Colors.green,
         direction: "down",
+        coins: 0,
+        diamonds: 0,
+        price: 0,
         score: 0,
         positions: [45, 65, 85, 105, 125]);
   }
@@ -206,6 +212,9 @@ class _GameState extends State<Game> {
 
   generateNewFood() {
     food = random.nextInt(foodRange);
+  }
+  generateNewCoin() {
+    coin = randomCoin.nextInt(foodRange);
   }
 
   updateBots()
@@ -296,6 +305,10 @@ class _GameState extends State<Game> {
           break;
         default:
       }
+       if (snake.positions.last == coin) {
+         snake.coins += 50;
+         generateNewCoin();
+       }
       if (snake.positions.last == food) {
         snake.score += 20;
         generateNewFood();
@@ -340,6 +353,9 @@ class _GameState extends State<Game> {
                       } else if (food == index) {
                         return foodPart();
                       } 
+                      else if (coin== index) {
+                        return coinPart();
+                      } 
                       else {
                         for(var i = 0; i < bots.length; i++)
                         {
@@ -355,11 +371,15 @@ class _GameState extends State<Game> {
             ),
             Align(
               alignment: Alignment.topCenter,
-              child: Column(
-                children: <Widget>[
-                  _scoreWidget(),
-                //  _livesWidget(),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    _scoreWidget(),
+                    _coinsWidget(),
+                  ],
+                ),
               ),
             ),
             Align(
@@ -385,21 +405,28 @@ class _GameState extends State<Game> {
                       Text(
                         snake.score.toString(),
                         style: TextStyle(
-                            color: Colors.white.withOpacity(.5), fontSize: 25),
+                            color: Colors.white.withOpacity(.75), fontSize: 25),
                       ),
                     ],
                   );
   }
-  Widget _livesWidget()
+  Widget _coinsWidget()
   {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List<Widget>.generate(maxHealth, (index){
-        return Image.asset("assets/img/filledheart.png",width: 35,color: Colors.red.withOpacity(.9));
-      })
-         
-
-    );
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        "assets/img/singlecoin.png",
+                        width: 25,
+                      ),
+                      SizedBox(width: 5,),
+                      Text(
+                        snake.coins.toString(),
+                        style: TextStyle(
+                            color: Colors.white.withOpacity(.75), fontSize: 25),
+                      ),
+                    ],
+                  );
   }
 
   // Represents an empty board square
@@ -442,7 +469,19 @@ class _GameState extends State<Game> {
       child: Container(
         padding: EdgeInsets.all(2),
         decoration: BoxDecoration(
-            color: Colors.yellow, borderRadius: BorderRadius.circular(5)),
+            color: snake.color, borderRadius: BorderRadius.circular(5)),
+      ),
+    );
+  }
+  Widget coinPart() {
+    return Padding(
+      padding: const EdgeInsets.all(2.0),
+      child: Container(
+        padding: EdgeInsets.all(2),
+        child: Image.asset("assets/img/singlecoin.png"),
+        decoration: BoxDecoration(
+          color: Colors.yellow,
+             borderRadius: BorderRadius.circular(5)),
       ),
     );
   }

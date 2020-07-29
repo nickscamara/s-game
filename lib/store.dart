@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:premiumsnake/model/coin.dart';
 import 'package:premiumsnake/model/snake.dart';
 import 'package:premiumsnake/services/route_service.dart';
+import 'package:premiumsnake/services/user_service.dart';
 import 'package:provider/provider.dart';
 
 import 'model/board.dart';
+import 'model/user.dart';
 
 class Store extends StatefulWidget {
   Store({Key key}) : super(key: key);
@@ -14,6 +16,11 @@ class Store extends StatefulWidget {
 }
 
 class _StoreState extends State<Store> {
+  @override
+  void initState() { 
+    super.initState();
+    
+  }
   List<Snake> avaiableToBuy = [
     Snake(
       color: Colors.green,
@@ -86,49 +93,62 @@ class _StoreState extends State<Store> {
   @override
   Widget build(BuildContext context) {
     final routeService = Provider.of<RouteService>(context, listen: false);
-    return Scaffold(
-      backgroundColor: Colors.black,
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          FloatingActionButton(
-            child: Text("Back"),
-            onPressed: () => routeService.navigate(0),
-          ),
-          SizedBox(width: 10),
-          FloatingActionButton(
-            backgroundColor: Colors.orange,
-            child: Text(
-              "Play",
-              style: TextStyle(color: Colors.white),
-            ),
-            onPressed: () => routeService.navigate(2),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(15),
-          child: ListView(
-            shrinkWrap: true,
+    final userService = Provider.of<UserService>(context, listen: false);
+    return FutureBuilder<User>(
+      future: userService.getUser(),
+      builder: (context, snapshot) {
+        if(snapshot.data!= null  && snapshot.connectionState == ConnectionState.done)
+        {
+          User user = snapshot.data;
+          return Scaffold(
+          backgroundColor: Colors.black,
+          floatingActionButton: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              header("Shop Items"),
-              moreCoins(),
-              heading("Snakes"),
-              snakes(),
-              heading("Boards"),
-              boards(),
-              heading("Buy More Coins"),
-              coinsGrid(),
-              //backgrounds(),
+              FloatingActionButton(
+                child: Text("Back"),
+                onPressed: () => routeService.navigate(0),
+              ),
+              SizedBox(width: 10),
+              FloatingActionButton(
+                backgroundColor: Colors.orange,
+                child: Text(
+                  "Play",
+                  style: TextStyle(color: Colors.white),
+                ),
+                onPressed: () => routeService.navigate(2),
+              ),
             ],
           ),
-        ),
-      ),
+          body: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(15),
+              child: ListView(
+                shrinkWrap: true,
+                children: <Widget>[
+                  header("Shop Items",user),
+                  moreCoins(),
+                  heading("Snakes"),
+                  snakes(),
+                  heading("Boards"),
+                  boards(),
+                  heading("Buy More Coins"),
+                  coinsGrid(),
+                  //backgrounds(),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        }
+        return Container();
+        
+      }
     );
   }
 
-  Widget header(String text) {
+  Widget header(String text, User user) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
@@ -137,7 +157,7 @@ class _StoreState extends State<Store> {
           style: TextStyle(
               color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold),
         ),
-        coins(),
+        coins(user.coins),
       ],
     );
   }
@@ -213,14 +233,14 @@ class _StoreState extends State<Store> {
     print("Bought! Coins");
   }
 
-  Widget coins() {
+  Widget coins(int coins) {
     return Row(
       children: <Widget>[
         Image.asset("assets/img/coin.png", width: 25),
         SizedBox(
           width: 3,
         ),
-        Text("999999")
+        Text(coins.toString())
       ],
     );
   }
