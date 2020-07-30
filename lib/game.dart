@@ -4,14 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:premiumsnake/dialogs/win_dialog.dart';
 import 'package:premiumsnake/main.dart';
 import 'package:premiumsnake/menu.dart';
+import 'package:premiumsnake/model/board.dart';
 import 'package:premiumsnake/model/snake.dart';
 import 'package:premiumsnake/services/route_service.dart';
 import 'package:premiumsnake/services/user_service.dart';
 import 'package:provider/provider.dart';
 
-class Game extends StatefulWidget {
-  Game({Key key}) : super(key: key);
+import 'model/items_to_buy.dart';
+import 'model/user.dart';
 
+class Game extends StatefulWidget {
+  final User user;
+  Game(this.user);
   @override
   _GameState createState() => _GameState();
 }
@@ -23,6 +27,8 @@ class _GameState extends State<Game> {
   int maxHealth = 3;
   // Initialize snake with positions, name, color and score of 0
   Snake snake;
+  Board board;
+  ////////////
   static var random;
   static var randomCoin;
   List<Snake> bots = [];
@@ -47,7 +53,8 @@ class _GameState extends State<Game> {
 
   startGame() {
     resetBots();
-    initializeSnake();
+    initializeUserItems();
+   
     initalizeRandoms();
     initializeItems();
     timer = Timer.periodic(Duration(milliseconds: 100), (timer) {
@@ -63,6 +70,11 @@ class _GameState extends State<Game> {
   resetBots() {
     placeHolderBots = [];
     bots = [];
+  }
+  initializeUserItems()
+  {
+    initializeSnake(widget.user);
+    initializeBoard(widget.user);
   }
 
   initalizeRandoms() {
@@ -141,14 +153,34 @@ class _GameState extends State<Game> {
               bots.add(bot1);
             }));
   }
+  initializeBoard(User user) {
+     for( var i in boardsToBuy)
+      {
+      if(i.id == user.currentBoard )
+      {
+        board = i;
+      }
+    }
 
-  initializeSnake() {
+
+  }
+
+  initializeSnake(User user) {
     Random rand = Random();
     var direction = rand.nextInt(3);
     var positioni = rand.nextInt(botRange);
+    Snake userSnake;
+    for( var i in avaiableToBuy)
+    {
+      if(i.id == user.currentSnake )
+      {
+        userSnake = i;
+      }
+    }
+
     snake = Snake(
-        name: "Snake 1",
-        color: Colors.green,
+        name: userSnake.name,
+        color: userSnake.color,
         direction: directions[direction],
         coins: 0,
         diamonds: 0,
@@ -318,7 +350,7 @@ class _GameState extends State<Game> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: board.color,
       body: SafeArea(
         child: Stack(
           children: [
@@ -400,11 +432,11 @@ class _GameState extends State<Game> {
       children: [
         Text(
           "Score: ",
-          style: TextStyle(color: Colors.white.withOpacity(.5), fontSize: 25),
+          style: TextStyle(color: board.color == Colors.white ? Colors.black.withOpacity(.8): Colors.white.withOpacity(.5), fontSize: 25),
         ),
         Text(
           snake.score.toString(),
-          style: TextStyle(color: Colors.white.withOpacity(.75), fontSize: 25),
+          style: TextStyle(color: board.color == Colors.white ? Colors.black.withOpacity(.8): Colors.white.withOpacity(.5), fontSize: 25),
         ),
       ],
     );
@@ -423,7 +455,7 @@ class _GameState extends State<Game> {
         ),
         Text(
           snake.coins.toString(),
-          style: TextStyle(color: Colors.white.withOpacity(.75), fontSize: 25),
+          style: TextStyle(color:board.color == Colors.white ? Colors.black.withOpacity(.8): Colors.white.withOpacity(.5), fontSize: 25),
         ),
       ],
     );

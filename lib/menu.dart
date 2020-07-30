@@ -32,12 +32,28 @@ class _MenuState extends State<Menu> {
         }
         else if(value.navigateTo == 2)
         {
-          return Game();
+          return game(value);
         }
         return menu(value);
       },
     );
     
+  }
+  Widget game(RouteService routeService)
+  {
+     final userService = Provider.of<UserService>(context, listen: false);
+     return FutureBuilder(
+        future: userService.getUser(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.data != null) {
+                User user = snapshot.data;
+                return Game(user);
+                }
+                return Container();
+        },
+     );
+
   }
 
   Widget menu(RouteService routeService)
