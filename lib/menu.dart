@@ -88,7 +88,7 @@ class _MenuState extends State<Menu> {
                         ),
                         Align(
                             alignment: Alignment.center,
-                            child: Image.asset("assets/img/logo1.png",
+                            child: Image.asset("assets/img/logo2.png",
                                 width: 500, height: 500)),
                         Align(
                           alignment: Alignment.bottomCenter,

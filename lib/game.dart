@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:premiumsnake/dialogs/win_dialog.dart';
 import 'package:premiumsnake/main.dart';
@@ -26,8 +25,9 @@ class _GameState extends State<Game> {
   Snake snake;
   static var random;
   static var randomCoin;
-  List<Snake> bots =[];
-  List<String> directions = ["up","down","left","right"];
+  List<Snake> bots = [];
+  List<Snake> placeHolderBots = [];
+  List<String> directions = ["up", "down", "left", "right"];
   Timer timer;
   var food;
   var coin;
@@ -44,8 +44,9 @@ class _GameState extends State<Game> {
     super.dispose();
     timer.cancel();
   }
-  
+
   startGame() {
+    resetBots();
     initializeSnake();
     initalizeRandoms();
     initializeItems();
@@ -53,76 +54,77 @@ class _GameState extends State<Game> {
       updateGame();
       if (gameOver()) {
         finishGame(context);
-       
+
         //do smth
       }
     });
   }
-  initalizeRandoms(){
+
+  resetBots() {
+    placeHolderBots = [];
+    bots = [];
+  }
+
+  initalizeRandoms() {
     random = Random();
     randomCoin = Random();
-
   }
-  initializeItems(){
+
+  initializeItems() {
     food = random.nextInt(foodRange);
     coin = randomCoin.nextInt(foodRange);
   }
-  restartGame()
-  {
+
+  restartGame() {
     startGame();
   }
-  generateRandomPositionList(String direction, int initialPosition, int snakeLength)
-  {
-    List<int> positionsList =[];
+
+  generateRandomPositionList(
+      String direction, int initialPosition, int snakeLength) {
+    List<int> positionsList = [];
     positionsList.add(initialPosition);
-    for(var i = 0; i < snakeLength - 1 ; i++)
-    {
-    switch (direction) {
+    for (var i = 0; i < snakeLength - 1; i++) {
+      switch (direction) {
         case "down":
-          if (initialPosition > numberOfSquares - 20) {
-            positionsList.add(initialPosition + 20 - numberOfSquares);
+          if (positionsList.last > numberOfSquares - 20) {
+            positionsList.add(positionsList.last + 20 - numberOfSquares);
           } else {
-            positionsList.add(initialPosition + 20);
+            positionsList.add(positionsList.last + 20);
           }
           break;
         case "up":
-          if (initialPosition < 20) {
-            positionsList.add(initialPosition - 20 + numberOfSquares);
+          if (positionsList.last < 20) {
+            positionsList.add(positionsList.last - 20 + numberOfSquares);
           } else {
-            positionsList.add(initialPosition - 20);
+            positionsList.add(positionsList.last - 20);
           }
           break;
         case "left":
-          if (initialPosition % 20 == 0) {
-            positionsList.add(initialPosition - 1 + 20);
+          if (positionsList.last % 20 == 0) {
+            positionsList.add(positionsList.last - 1 + 20);
           } else {
-            positionsList.add(initialPosition - 1);
+            positionsList.add(positionsList.last - 1);
           }
           break;
         case "right":
-          if ((initialPosition + 1) % 20 == 0) {
-            positionsList.add(initialPosition + 1 - 20);
+          if ((positionsList.last + 1) % 20 == 0) {
+            positionsList.add(positionsList.last + 1 - 20);
           } else {
-            positionsList.add(initialPosition + 1);
+            positionsList.add(positionsList.last + 1);
           }
           break;
         default:
-
       }
     }
     return positionsList;
-    
   }
-  checkLength()
-  {
-    
-  }
-  spawnBots()
-  {
 
+  checkLength() {}
+  spawnBots() {
     var direction = random.nextInt(3);
     var position = random.nextInt(botRange);
-    var positions = generateRandomPositionList(directions[direction],position, 5);
+    var positions =
+        generateRandomPositionList(directions[direction], position, 5);
     Snake bot1 = Snake(
         name: "bot 1",
         color: Colors.red,
@@ -130,69 +132,69 @@ class _GameState extends State<Game> {
         score: 0,
         positions: positions);
     setState(() {
-      bots.add(bot1);
+      placeHolderBots.add(bot1);
     });
-  
+    Future.delayed(
+        Duration(seconds: 3),
+        () => setState(() {
+              placeHolderBots.remove(bot1);
+              bots.add(bot1);
+            }));
   }
 
   initializeSnake() {
+    Random rand = Random();
+    var direction = rand.nextInt(3);
+    var positioni = rand.nextInt(botRange);
     snake = Snake(
         name: "Snake 1",
         color: Colors.green,
-        direction: "down",
+        direction: directions[direction],
         coins: 0,
         diamonds: 0,
         price: 0,
         score: 0,
-        positions: [45, 65, 85, 105, 125]);
+        positions:
+            generateRandomPositionList(directions[direction], positioni, 5));
   }
-  
-  finishGame(context) async
-  {
+
+  finishGame(context) async {
     final routeService = Provider.of<RouteService>(context, listen: false);
     timer.cancel();
     await saveProgress();
     removeBots();
-     showGameOverDialog(context, snake,(){
+    showGameOverDialog(context, snake, () {
       restartGame();
       Navigator.pop(context);
-    },(){
+    }, () {
       Navigator.pop(context);
-      routeService.navigate(1);},(){
+      routeService.navigate(1);
+    }, () {
       Navigator.pop(context);
       routeService.navigate(0);
-      }
-     );
+    });
   }
-  saveProgress() async
-  {
+
+  saveProgress() async {
     final userService = Provider.of<UserService>(context, listen: false);
     final response = await userService.updatePreferences(snake);
-
   }
-  removeBots()
-  {
-    setState(() {
-      for(var x = 0; x < bots.length; x++)
-    {
-      bots.remove(bots[x]);
-    }
-      
-    });
-    
 
+  removeBots() {
+    setState(() {
+      for (var x = 0; x < bots.length; x++) {
+        bots.remove(bots[x]);
+      }
+    });
   }
 
   gameOver() {
     for (var i = 0; i < snake.positions.length; i++) {
       var count = 0;
       for (var j = 0; j < snake.positions.length; j++) {
-        for(var x = 0; x < bots.length; x++)
-        {
-          for(var t = 0; t < bots[x].positions.length; t++)
-          {
-            if(snake.positions[i] == bots[x].positions[t])
-            {
+        for (var x = 0; x < bots.length; x++) {
+          for (var t = 0; t < bots[x].positions.length; t++) {
+            if (snake.positions[i] == bots[x].positions[t]) {
               count = 2;
             }
           }
@@ -202,9 +204,7 @@ class _GameState extends State<Game> {
         }
         if (count == 2) {
           return true;
-
         }
-
       }
     }
     return false;
@@ -213,14 +213,13 @@ class _GameState extends State<Game> {
   generateNewFood() {
     food = random.nextInt(foodRange);
   }
+
   generateNewCoin() {
     coin = randomCoin.nextInt(foodRange);
   }
 
-  updateBots()
-  {
-    for(var i in bots)
-    {
+  updateBots() {
+    for (var i in bots) {
       switch (i.direction) {
         case "down":
           if (i.positions.last > numberOfSquares - 20) {
@@ -253,29 +252,27 @@ class _GameState extends State<Game> {
         default:
       }
       i.positions.removeAt(0);
-      
-
     }
   }
 
-  checkToSpawnBot()
-  {
-    if(snake.score >= 50 && bots.length == 0)
-    {
+  checkToSpawnBot() {
+    if (snake.score >= 20 && bots.length == 0 && placeHolderBots.length == 0) {
       spawnBots();
     }
-
+    if (snake.score >= 50 && bots.length == 1 && placeHolderBots.length == 0) {
+      spawnBots();
+    }
   }
 
   updateGame() {
     setState(() {
       checkToSpawnBot();
-      if(bots.length > 0)
-      {
+      if (bots.length > 0) {
         updateBots();
       }
       switch (snake.direction) {
         case "down":
+          // LAST ROW OF GRIDS
           if (snake.positions.last > numberOfSquares - 20) {
             snake.positions.add(snake.positions.last + 20 - numberOfSquares);
           } else {
@@ -305,10 +302,10 @@ class _GameState extends State<Game> {
           break;
         default:
       }
-       if (snake.positions.last == coin) {
-         snake.coins += 50;
-         generateNewCoin();
-       }
+      if (snake.positions.last == coin) {
+        snake.coins += 50;
+        generateNewCoin();
+      }
       if (snake.positions.last == food) {
         snake.score += 20;
         generateNewFood();
@@ -331,7 +328,6 @@ class _GameState extends State<Game> {
                   snake.direction = "down";
                 } else if (snake.direction != "down" && details.delta.dy < 0) {
                   snake.direction = "up";
-                 
                 }
               },
               onHorizontalDragUpdate: (details) {
@@ -352,16 +348,17 @@ class _GameState extends State<Game> {
                         return snakePart();
                       } else if (food == index) {
                         return foodPart();
-                      } 
-                      else if (coin== index) {
+                      } else if (coin == index) {
                         return coinPart();
-                      } 
-                      else {
-                        for(var i = 0; i < bots.length; i++)
-                        {
-                          if(bots[i].positions.contains(index))
-                          {
+                      } else {
+                        for (var i = 0; i < bots.length; i++) {
+                          if (bots[i].positions.contains(index)) {
                             return botPart();
+                          }
+                        }
+                        for (var i = 0; i < placeHolderBots.length; i++) {
+                          if (placeHolderBots[i].positions.contains(index)) {
+                            return PlaceHolderBot();
                           }
                         }
                         return boardSquare();
@@ -384,7 +381,12 @@ class _GameState extends State<Game> {
             ),
             Align(
               alignment: Alignment.bottomRight,
-              child: RaisedButton.icon(onPressed: (){finishGame(context);}, icon: Icon(Icons.close), label: Text("Game Over")),
+              child: RaisedButton.icon(
+                  onPressed: () {
+                    finishGame(context);
+                  },
+                  icon: Icon(Icons.close),
+                  label: Text("Game Over")),
             )
           ],
         ),
@@ -392,41 +394,39 @@ class _GameState extends State<Game> {
     );
   }
 
-  Widget _scoreWidget()
-  {
+  Widget _scoreWidget() {
     return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Score: ",
-                        style: TextStyle(
-                            color: Colors.white.withOpacity(.5), fontSize: 25),
-                      ),
-                      Text(
-                        snake.score.toString(),
-                        style: TextStyle(
-                            color: Colors.white.withOpacity(.75), fontSize: 25),
-                      ),
-                    ],
-                  );
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Score: ",
+          style: TextStyle(color: Colors.white.withOpacity(.5), fontSize: 25),
+        ),
+        Text(
+          snake.score.toString(),
+          style: TextStyle(color: Colors.white.withOpacity(.75), fontSize: 25),
+        ),
+      ],
+    );
   }
-  Widget _coinsWidget()
-  {
+
+  Widget _coinsWidget() {
     return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        "assets/img/singlecoin.png",
-                        width: 25,
-                      ),
-                      SizedBox(width: 5,),
-                      Text(
-                        snake.coins.toString(),
-                        style: TextStyle(
-                            color: Colors.white.withOpacity(.75), fontSize: 25),
-                      ),
-                    ],
-                  );
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset(
+          "assets/img/singlecoin.png",
+          width: 25,
+        ),
+        SizedBox(
+          width: 5,
+        ),
+        Text(
+          snake.coins.toString(),
+          style: TextStyle(color: Colors.white.withOpacity(.75), fontSize: 25),
+        ),
+      ],
+    );
   }
 
   // Represents an empty board square
@@ -451,6 +451,7 @@ class _GameState extends State<Game> {
       ),
     );
   }
+
   Widget botPart() {
     return Padding(
       padding: const EdgeInsets.all(2.0),
@@ -461,7 +462,6 @@ class _GameState extends State<Game> {
       ),
     );
   }
-  
 
   Widget foodPart() {
     return Padding(
@@ -473,6 +473,7 @@ class _GameState extends State<Game> {
       ),
     );
   }
+
   Widget coinPart() {
     return Padding(
       padding: const EdgeInsets.all(2.0),
@@ -480,8 +481,55 @@ class _GameState extends State<Game> {
         padding: EdgeInsets.all(2),
         child: Image.asset("assets/img/singlecoin.png"),
         decoration: BoxDecoration(
-          color: Colors.yellow,
-             borderRadius: BorderRadius.circular(5)),
+            color: Colors.yellow, borderRadius: BorderRadius.circular(5)),
+      ),
+    );
+  }
+}
+
+class PlaceHolderBot extends StatefulWidget {
+  PlaceHolderBot({Key key}) : super(key: key);
+
+  @override
+  _PlaceHolderBotState createState() => _PlaceHolderBotState();
+}
+
+class _PlaceHolderBotState extends State<PlaceHolderBot>
+    with SingleTickerProviderStateMixin {
+  Animation<double> animation;
+  AnimationController controller;
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(
+        duration: const Duration(milliseconds: 1500), vsync: this);
+    animation = Tween<double>(begin: 0, end: 1).animate(controller)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          controller.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          controller.forward();
+        }
+      });
+    controller.forward();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(2.0),
+      child: Container(
+        padding: EdgeInsets.all(2),
+        decoration: BoxDecoration(
+            color: Colors.red.withOpacity(animation.value),
+            borderRadius: BorderRadius.circular(5)),
       ),
     );
   }

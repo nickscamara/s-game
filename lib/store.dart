@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:premiumsnake/model/coin.dart';
 import 'package:premiumsnake/model/snake.dart';
@@ -21,20 +23,24 @@ class _StoreState extends State<Store> {
     super.initState();
     
   }
+  User savedUser;
   List<Snake> avaiableToBuy = [
     Snake(
+      id: "1",
       color: Colors.green,
       name: "Mint",
       price: 300,
       image: "assets/img/snake_green.png",
     ),
     Snake(
+      id: "2",
       color: Colors.purple,
       name: "Jackson",
       price: 500,
       image: "assets/img/snake_purple.png",
     ),
     Snake(
+      id: "3",
       color: Colors.orange,
       name: "Peterson",
       price: 700,
@@ -43,33 +49,39 @@ class _StoreState extends State<Store> {
   ];
   List<Board> boardsToBuy = [
     Board(
+      id: "1",
       color: Colors.white,
       name: "Super White",
-      price: 4000,
+      price: 350,
     ),
     Board(
+      id: "2",
       color: Colors.orange,
       name: "Old School",
-      price: 5500,
+      price: 1000,
     ),
     Board(
+      id: "3",
       color: Colors.blue,
       name: "Preimum",
-      price: 10000,
+      price: 960,
     ),
   ];
   List<Coin> coinsToBuy = [
     Coin(
+      id: "1",
       quantity: 150,
       name: "Default Pack",
       price: 3.99,
     ),
     Coin(
+      id: "2",
       quantity: 3500,
       name: "Preimum Pack",
       price: 5.99,
     ),
     Coin(
+      id: "3",
       quantity: 5000,
       name: "Gold Pack",
       price: 21.99,
@@ -94,59 +106,66 @@ class _StoreState extends State<Store> {
   Widget build(BuildContext context) {
     final routeService = Provider.of<RouteService>(context, listen: false);
     final userService = Provider.of<UserService>(context, listen: false);
-    return FutureBuilder<User>(
-      future: userService.getUser(),
-      builder: (context, snapshot) {
-        if(snapshot.data!= null  && snapshot.connectionState == ConnectionState.done)
-        {
-          User user = snapshot.data;
-          return Scaffold(
-          backgroundColor: Colors.black,
-          floatingActionButton: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              FloatingActionButton(
-                child: Text("Back"),
-                onPressed: () => routeService.navigate(0),
-              ),
-              SizedBox(width: 10),
-              FloatingActionButton(
-                backgroundColor: Colors.orange,
-                child: Text(
-                  "Play",
-                  style: TextStyle(color: Colors.white),
+    return Scaffold(
+            backgroundColor: Colors.black,
+             floatingActionButton: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                FloatingActionButton(
+                  child: Text("Back"),
+                  onPressed: () => routeService.navigate(0),
                 ),
-                onPressed: () => routeService.navigate(2),
-              ),
-            ],
-          ),
-          body: SafeArea(
-            child: Padding(
-              padding: EdgeInsets.all(15),
-              child: ListView(
-                shrinkWrap: true,
-                children: <Widget>[
-                  header("Shop Items",user),
-                  moreCoins(),
-                  heading("Snakes"),
-                  snakes(),
-                  heading("Boards"),
-                  boards(),
-                  heading("Buy More Coins"),
-                  coinsGrid(),
-                  //backgrounds(),
-                ],
-              ),
+                SizedBox(width: 10),
+                FloatingActionButton(
+                  backgroundColor: Colors.orange,
+                  child: Text(
+                    "Play",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () => routeService.navigate(2),
+                ),
+              ],
             ),
-          ),
-        );
 
+          body: FutureBuilder<User>(
+        future: userService.getUser(),
+        builder: (context, snapshot) {
+          if(snapshot.data!= null  && snapshot.connectionState == ConnectionState.done)
+          {
+            User user = snapshot.data;
+            savedUser = user;
+            return  storeLayout(user);
+          }
+          return savedUser != null ? storeLayout(savedUser) : Container();
+          
         }
-        return Container();
-        
-      }
+      ),
     );
   }
+
+  Widget storeLayout(User user)
+  {
+    return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.all(15),
+                child: ListView(
+                  shrinkWrap: true,
+                  children: <Widget>[
+                    header("Shop Items",user),
+                    moreCoins(),
+                    heading("Snakes"),
+                    snakes(user),
+                    heading("Boards"),
+                    boards(user),
+                    heading("Buy More Coins"),
+                    coinsGrid(user),
+                    //backgrounds(),
+                  ],
+                ),
+              ),
+          );
+  }
+
 
   Widget header(String text, User user) {
     return Row(
@@ -177,7 +196,7 @@ class _StoreState extends State<Store> {
     );
   }
 
-  Widget boards() {
+  Widget boards(User user) {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 175,
@@ -185,13 +204,28 @@ class _StoreState extends State<Store> {
           scrollDirection: Axis.horizontal,
           itemCount: boardsToBuy.length,
           itemBuilder: (context, index) {
-            return boardCard(
-                boardsToBuy[index], () => buyBoard(boardsToBuy[index]));
+             if(user.boardsIds.contains(boardsToBuy[index].id))
+            {
+              if(user.currentBoard == boardsToBuy[index].id)
+              {
+                return snakeCard(
+                boardsToBuy[index], () => buy(boardsToBuy[index]),true,true, ()=> selectSnake(boardsToBuy[index]));
+
+              }
+              return snakeCard(
+                boardsToBuy[index], () => buy(boardsToBuy[index]),true,false,  ()=> selectSnake(boardsToBuy[index]));
+              
+
+            }
+            
+             return snakeCard(
+                boardsToBuy[index], () => buy(boardsToBuy[index]),false);
+            
           }),
     );
   }
 
-  Widget coinsGrid() {
+  Widget coinsGrid(User user) {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 500,
@@ -207,7 +241,7 @@ class _StoreState extends State<Store> {
     );
   }
 
-  Widget snakes() {
+  Widget snakes(User user) {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 175,
@@ -215,14 +249,60 @@ class _StoreState extends State<Store> {
           scrollDirection: Axis.horizontal,
           itemCount: avaiableToBuy.length,
           itemBuilder: (context, index) {
-            return snakeCard(
-                avaiableToBuy[index], () => buy(avaiableToBuy[index]));
+            if(user.snakesIds.contains(avaiableToBuy[index].id))
+            {
+              if(user.currentSnake == avaiableToBuy[index].id)
+              {
+                return snakeCard(
+                avaiableToBuy[index], () => buy(avaiableToBuy[index]),true,true, ()=> selectSnake(avaiableToBuy[index]));
+
+              }
+              return snakeCard(
+                avaiableToBuy[index], () => buy(avaiableToBuy[index]),true,false,  ()=> selectSnake(avaiableToBuy[index]));
+              
+
+            }
+            
+             return snakeCard(
+                avaiableToBuy[index], () => buy(avaiableToBuy[index]),false);
+            
           }),
     );
   }
 
-  buy(Snake snake) {
-    print("Bought!");
+  buy(dynamic item) async {
+    final userService = Provider.of<UserService>(context,listen:false);
+    final response = await userService.buyItem(item);
+    if(response.isError)
+    {
+      //SHow dialog
+    }
+    else
+    {
+      setState(() {
+        
+      });
+      // Show Dialog
+      // refresh the page
+      // make sure it shows up
+    }
+  }
+  selectSnake(dynamic item) async
+  {
+    final userService = Provider.of<UserService>(context,listen:false);
+    final response = await userService.selectItem(item);
+    if(response.isError)
+    {
+
+
+    }
+    else
+    {
+      setState(() {
+        
+      });
+    }
+
   }
 
   buyBoard(Board board) {
@@ -331,7 +411,7 @@ class _StoreState extends State<Store> {
     );
   }
 
-  Widget snakeCard(Snake snake, Function onTap) {
+  Widget snakeCard(dynamic snake, Function onTap, bool bought, [bool selected, Function onSelect] ) {
     return Container(
       height: 175,
       width: 140,
@@ -341,7 +421,8 @@ class _StoreState extends State<Store> {
               padding: EdgeInsets.only(left: 0.0, top: 8, right: 25, bottom: 8),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(.25),
+                  color: !bought ?Colors.grey.withOpacity(.25) : null,
+                  gradient: bought ? LinearGradient(colors: [Colors.amber, Colors.orange]) : null,
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: Material(
@@ -351,7 +432,7 @@ class _StoreState extends State<Store> {
                   color: Colors.transparent,
                   //color: color,
                   child: InkWell(
-                    onTap: onTap,
+                    onTap: !bought ? onTap : onSelect,
                     child: Container(
                       width: 140,
                       height: 140,
@@ -378,22 +459,28 @@ class _StoreState extends State<Store> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Align(
+                                  snake is Snake ? Align(
                                       alignment: Alignment.center,
                                       child: Image.asset(
                                         snake.image,
                                         width: 50,
                                         height: 50,
+                                      )) :  Align(
+                                      alignment: Alignment.center,
+                                      child: Container(
+                                        width: 35,
+                                        height: 50,
+                                        color: snake.color,
                                       )),
                                   SizedBox(
                                     height: 5,
                                   ),
                                   Text(
-                                    snake.price.toString(),
+                                    !bought ? snake.price.toString() : "Select",
                                     maxLines: 1,
                                     style: TextStyle(
-                                        fontSize: 25,
-                                        color: Colors.orange[300],
+                                        fontSize: 22,
+                                        color: !bought ? Colors.orange[300] : Colors.white,
                                         fontWeight: FontWeight.bold),
                                     textAlign: TextAlign.center,
                                   ),
@@ -415,6 +502,12 @@ class _StoreState extends State<Store> {
                   ),
                 ),
               )),
+              selected == true ? Align(
+                alignment: Alignment.topRight,
+                child: CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.check,color: Colors.lightGreen,))) : Container()
+        
         ],
       ),
     );
@@ -481,7 +574,7 @@ class _StoreState extends State<Store> {
                                     board.price.toString(),
                                     maxLines: 1,
                                     style: TextStyle(
-                                        fontSize: 25,
+                                        fontSize: 22,
                                         color: Colors.orange[300],
                                         fontWeight: FontWeight.bold),
                                     textAlign: TextAlign.center,
